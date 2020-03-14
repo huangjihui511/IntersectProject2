@@ -7,7 +7,7 @@
 #define MAX_LENGTH 99999999;
 using namespace std;
 
-enum GType { L, C };
+enum GType { L, C, S, R};
 const double eps = 1e-7;
 
 class Point : public pair<double, double> {
@@ -29,7 +29,7 @@ public:
 	double a;
 	double b;
 	double c;
-	char type;
+	GType type;
 	Point e;
 	Point p1;
 	Point p2;
@@ -38,8 +38,9 @@ public:
 		a = 0;
 		b = 0;
 		c = 0;
+		type = L;
 	}
-	Line(Point source, Point target, char type);
+	Line(Point source, Point target, GType type);
 	int getIntersection_ll(set<Point>* intersections, Line l1, Line l2);
 	void operator=(const Line& line);
 };
@@ -99,4 +100,5 @@ public:
 
 int dcmp(double x);
 int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
+GType char2type(char c);
 #endif

@@ -39,7 +39,7 @@ bool Point::operator<(const Point& p)const {
 	return dcmp(first - p.first) == 0 ? dcmp(second - p.second) < 0 : dcmp(first - p.first) < 0;
 }
 
-Line::Line(Point src, Point dst, char t) {
+Line::Line(Point src, Point dst, GType t) {
 	a = src.second - dst.second;
 	b = dst.first - src.first;
 	c = src.first * dst.second - dst.first * src.second;
@@ -56,6 +56,7 @@ void Line::operator=(const Line& line) {
 	e = line.e;
 	p1 = line.p1;
 	p2 = line.p2;
+	type = line.type;
 }
 int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 	double D = l1.a * l2.b - l2.a * l1.b;
@@ -148,13 +149,15 @@ bool onLine(Line l, Point p)
 {
 	switch (l.type)
 	{
-	case 'L': return true;
-	case 'R': {
-		return ((p.first - l.p1.first)/(l.p2.first - l.p1.first) >= 0
-			&& (p.second - l.p1.second) / (l.p2.second - l.p1.second) >= 0);
+	case L: return true;
+	case R: {
+		//return ((p.first - l.p1.first)/(l.p2.first - l.p1.first) >= 0
+		//	&& (p.second - l.p1.second) / (l.p2.second - l.p1.second) >= 0);
+		return ((p.first - l.p1.first) * (l.p2.first - l.p1.first) >= 0);
 	}
-	case 'S': {
-		return (length(l.p1 - p) + length(l.p2 - p) == length(l.p1 - l.p2));
+	case S: {
+		//return (length(l.p1 - p) + length(l.p2 - p) == length(l.p1 - l.p2));
+		return ((p.first - l.p1.first) * (l.p2.first - p.first) >= 0);
 	}
 	default:
 		break;
@@ -196,13 +199,23 @@ int getIntersection_cl(set<Point>* intersections, Circle c, Line l) {
 	//inter2.first = (float)inter2.first;
 	//inter2.second = (float)inter2.second;
 	if (inter1 == inter2) {
-		intersections->insert(inter1);
-		return 1;
+		if (onLine(l, inter1)) {
+			intersections->insert(inter1);
+			return 1;
+		}
+		return 0;
 	}
 	else {
-		intersections->insert(inter1);
-		intersections->insert(inter2);
-		return 2;
+		int interN = 0;
+		if (onLine(l, inter1)) {
+			intersections->insert(inter1);
+			interN++;
+		}
+		if (onLine(l, inter2)) {
+			intersections->insert(inter2);
+			interN++;
+		}
+		return interN;
 	}
 }
 
@@ -232,7 +245,7 @@ void Core::addGeomrtie(string buffer)
 	case 'S': {
 		double x1, y1, x2, y2;
 		text >> x1 >> y1 >> x2 >> y2;
-		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2),type));
+		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2),char2type(type)));
 		break;
 	}
 	case 'C': {
@@ -243,6 +256,16 @@ void Core::addGeomrtie(string buffer)
 	}
 	default:
 		break;
+	}
+}
+
+GType char2type(char c) {
+	switch(c)
+	{
+		case 'L': return L;
+		case 'R': return R;
+		case 'S': return S;
+		case 'C': return C;
 	}
 }
 
@@ -281,10 +304,5 @@ int Core::intersect()
 			}
 		}
 	}
-	return geomrties.size();
+	return intersections.size();
 }
-
-
-
-
-

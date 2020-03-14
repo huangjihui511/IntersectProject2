@@ -55,6 +55,46 @@ public:
 	int getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2);
 };
 
+struct Geometry {
+	GType Gflag;
+	union {
+		Line lObj;
+		Circle cObj;
+	};
+
+	Geometry(Line l) {
+		Gflag = L;
+		lObj = l;
+	}
+
+	Geometry(Circle c) {
+		Gflag = C;
+		cObj = c;
+	}
+
+	void getObj(Line& obj) {
+		if (Gflag == L) {
+			obj = lObj;
+		}
+	}
+
+	void getObj(Circle& obj) {
+		if (Gflag == C) {
+			obj = cObj;
+		}
+	}
+};
+
+class Core {
+
+public:
+	set<Point> intersections;
+	vector<Geometry> geomrties;
+	void addGeomrties(ifstream *fin);
+	void addGeomrtie(string text);
+	int intersect();
+};
+
 int dcmp(double x);
 int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
 #endif

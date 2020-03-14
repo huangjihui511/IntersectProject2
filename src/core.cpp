@@ -182,75 +182,39 @@ int getIntersection_cl(set<Point>* intersections, Circle c, Line l) {
 	}
 }
 
-struct Geometry {
-	GType Gflag;
-	union {
-		Line lObj;
-		Circle cObj;
-	};
 
-	Geometry(Line l) {
-		Gflag = L;
-		lObj = l;
-	}
 
-	Geometry(Circle c) {
-		Gflag = C;
-		cObj = c;
-	}
-
-	void getObj(Line& obj) {
-		if (Gflag == L) {
-			obj = lObj;
-		}
-	}
-
-	void getObj(Circle& obj) {
-		if (Gflag == C) {
-			obj = cObj;
-		}
-	}
-};
-
-int main(int argc, char** argv)
+void Core::addGeomrties(ifstream *fin)
 {
-
-	vector<Geometry> geomrties;
-	ifstream fin(argv[2]);
-	ofstream fout(argv[4]);
-	//ifstream fin("input.txt");
-	//ofstream fout("output.txt");
-	ofstream fpoint("point.txt");
-	if (!fin) {
-		cout << "文件打开失败!" << endl;
-		exit(1);
-	}
-	if (!fout) {
-		cout << "文件打开失败!" << endl;
-		exit(1);
-	}
 	char buffer[256];
 	int n;
-	fin.getline(buffer, 100);
+	fin->getline(buffer, 255);
 	n = stoi(buffer);
 	while (n--) {
-		char type;
-		fin.getline(buffer, sizeof(buffer));
-		stringstream text(buffer);
-		text >> type;
-		if (type == 'L') {
-			double x1, y1, x2, y2;
-			text >> x1 >> y1 >> x2 >> y2;
-			geomrties.push_back(Line(Point(x1, y1), Point(x2, y2)));
-		}
-		else {
-			double x, y, r;
-			text >> x >> y >> r;
-			geomrties.push_back(Circle(Point(x, y), r));
-		}
+		fin->getline(buffer, sizeof(buffer));
+		addGeomrtie(buffer);
 	}
+}
 
-	set<Point> intersections;
+void Core::addGeomrtie(string buffer)
+{
+	char type;
+	stringstream text(buffer);
+	text >> type;
+	if (type == 'L') {
+		double x1, y1, x2, y2;
+		text >> x1 >> y1 >> x2 >> y2;
+		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2)));
+	}
+	else {
+		double x, y, r;
+		text >> x >> y >> r;
+		geomrties.push_back(Circle(Point(x, y), r));
+	}
+}
+
+int Core::intersect()
+{
 	for (int i = 0; i < (int)(geomrties.size()); i++) {
 		for (int j = 0; j < i; j++) {
 			if (geomrties[i].Gflag == L && geomrties[j].Gflag == L) {
@@ -284,124 +248,49 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-	fout << intersections.size() << endl;
-	int debug = 0;
-	if (debug) {
-		set<Point>::iterator iter = intersections.begin();
-		while (iter != intersections.end()) {
-			fpoint << iter->first << "," << iter->second << endl;
-			iter++;
-		}
-	}
-
-	fin.close();
-	fout.close();
-	fpoint.close();
-
-
-	//黑框输入
-	/*
-	vector<Geometry> geomrties;
-	int n;
-	cin >> n;
-	while (n--) {
-		char type;
-		cin >> type;
-		if (type == 'L') {
-			double x1, y1, x2, y2;
-			cin >> x1 >> y1 >> x2 >> y2;
-			geomrties.push_back(Line(Point(x1, y1), Point(x2, y2)));
-		}
-		else {
-			double x, y, r;
-			cin >> x >> y >> r;
-			geomrties.push_back(Circle(Point(x, y), r));
-		}
-	}
-	set<Point> intersections;
-	for (int i = 0; i < geomrties.size(); i++) {
-		for (int j = 0; j < i; j++) {
-			if (geomrties[i].Gflag == L && geomrties[j].Gflag == L) {
-				Line l1, l2;
-				geomrties[i].getObj(l1);
-				geomrties[j].getObj(l2);
-				l1.getIntersection_ll(&intersections, l1, l2);
-			}
-			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == C) {
-				Circle c1, c2;
-				geomrties[i].getObj(c1);
-				geomrties[j].getObj(c2);
-				c1.getIntersection_cc(&intersections, c1, c2);
-			}
-			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == L) {
-				Line line;
-				Circle circle;
-				geomrties[i].getObj(circle);
-				geomrties[j].getObj(line);
-				getIntersection_cl(&intersections, circle, line);
-			}
-			else if (geomrties[i].Gflag == L && geomrties[j].Gflag == C) {
-				Line line;
-				Circle circle;
-				geomrties[i].getObj(line);
-				geomrties[j].getObj(circle);
-				getIntersection_cl(&intersections, circle, line);
-			}
-			else {
-				cout << "几何体类型错误" << endl;
-			}
-		}
-	}
-	cout << intersections.size() << endl;
-	int debug = 0;
-	if (debug) {
-		set<Point>::iterator iter = intersections.begin();
-		while (iter != intersections.end()) {
-			cout << iter->first << "," << iter->second << endl;
-			iter++;
-		}
-	}
-	*/
-
-	//只有直线问题
-	/*
-		vector<Line> lines;
-	ifstream fin(argv[2]);
-	ofstream fout(argv[4]);
-	if (!fin) {
-		cout << "文件打开失败!" << endl;
-		exit(1);
-	}
-	if (!fout) {
-		cout << "文件打开失败!" << endl;
-		exit(1);
-	}
-	char buffer[256];
-	int n;
-	fin.getline(buffer, 100);
-	n = stoi(buffer);
-	while (n--) {
-		char type;
-		fin.getline(buffer, sizeof(buffer));
-		stringstream line(buffer);
-		line >> type;
-		if (type == 'L') {
-			double x1, y1, x2, y2;
-			line >> x1 >> y1 >> x2 >> y2;
-			lines.push_back(Line(Point(x1, y1), Point(x2, y2)));
-		}
-	}
-	set<Point> intersections;
-	for (int i = 0; i < lines.size(); i++) {
-		for (int j = 0; j < i; j++) {
-			try {
-				intersections.insert(lines[i].getIntersection_ll(lines[i], lines[j]));
-			}
-			catch (exception e) {}
-		}
-	}
-	fout << intersections.size() << endl;
-	fin.close();
-	fout.close();
-	*/
+	return geomrties.size();
 }
+
+
+
+int main(int argc, char** argv)
+{
+
+	Core core;
+	int result;
+	if (argc == 5) {
+		ifstream fin(argv[2]);
+		ofstream fout(argv[4]);
+		//ifstream fin("input.txt");
+		//ofstream fout("output.txt");
+		ofstream fpoint("point.txt");
+		if (!fin) {
+			cout << "文件打开失败!" << endl;
+			exit(1);
+		}
+		if (!fout) {
+			cout << "文件打开失败!" << endl;
+			exit(1);
+		}
+		
+		core.addGeomrties(&fin);
+		result = core.intersect();
+		fin.close();
+		fout.close();
+		fpoint.close();
+		fout << result << endl;
+	}
+	int debug = 1;
+	
+	if (debug) {
+		core.addGeomrtie("L 0 0 1 1");
+		core.addGeomrtie("L 0 0 1 1");
+		core.addGeomrtie("L 0 0 1 1");
+		core.addGeomrtie("L 0 0 1 1");
+	}
+	cout << result;
+
+	
+
+}
+

@@ -12,6 +12,7 @@ double sqr(double x);
 double dot(Point a, Point b);
 double length(Point a);
 bool onCircle(Point p, Circle c);
+bool onLine(Line l, Point p);
 double disLine(Point p, Line l);
 Point vbase(Circle c, Line l);
 Point prxy(Circle c, Line l);
@@ -38,13 +39,15 @@ bool Point::operator<(const Point& p)const {
 	return dcmp(first - p.first) == 0 ? dcmp(second - p.second) < 0 : dcmp(first - p.first) < 0;
 }
 
-Line::Line(Point src, Point dst) {
+Line::Line(Point src, Point dst, char t) {
 	a = src.second - dst.second;
 	b = dst.first - src.first;
 	c = src.first * dst.second - dst.first * src.second;
+	type = t;
 	p1 = src;
 	p2 = dst;
 	e = (p2 - p1) / length(p2 - p1);
+
 }
 void Line::operator=(const Line& line) {
 	a = line.a;
@@ -60,7 +63,10 @@ int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 	Point p = { (l1.b * l2.c - l2.b * l1.c) / D, (l2.a * l1.c - l1.a * l2.c) / D };
 	//p.first = (float)p.first;
 	//p.second = (float)p.second;
-	intersections->insert(p);
+
+	if (onLine(l1, p) && onLine(l2, p)) {
+		intersections->insert(p);
+	}
 	return 1;
 }
 
@@ -138,6 +144,24 @@ bool onCircle(Point p, Circle c) {
 	return dcmp(dot(p - c.c, p - c.c) - sqr(c.r)) == 0;
 }
 
+bool onLine(Line l, Point p)
+{
+	switch (l.type)
+	{
+	case 'L': return true;
+	case 'R': {
+		return ((p.first - l.p1.first)/(l.p2.first - l.p1.first) >= 0
+			&& (p.second - l.p1.second) / (l.p2.second - l.p1.second) >= 0);
+	}
+	case 'S': {
+		return (length(l.p1 - p) + length(l.p2 - p) == length(l.p1 - l.p2));
+	}
+	default:
+		break;
+	}
+	return false;
+}
+
 double disLine(Point p, Line l) {		//点到直线距离
 	double a = l.a, b = l.b, c = l.c;
 	double x = p.first, y = p.second;
@@ -201,15 +225,24 @@ void Core::addGeomrtie(string buffer)
 	char type;
 	stringstream text(buffer);
 	text >> type;
-	if (type == 'L') {
+	switch (type)
+	{
+	case 'L':
+	case 'R':
+	case 'S': {
 		double x1, y1, x2, y2;
 		text >> x1 >> y1 >> x2 >> y2;
-		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2)));
+		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2),type));
+		break;
 	}
-	else {
+	case 'C': {
 		double x, y, r;
 		text >> x >> y >> r;
 		geomrties.push_back(Circle(Point(x, y), r));
+		break;
+	}
+	default:
+		break;
 	}
 }
 

@@ -4,6 +4,7 @@
 
 #include<set>
 
+#define MAX_LENGTH 99999999;
 using namespace std;
 
 enum GType { L, C };
@@ -28,6 +29,7 @@ public:
 	double a;
 	double b;
 	double c;
+	char type;
 	Point e;
 	Point p1;
 	Point p2;
@@ -37,7 +39,7 @@ public:
 		b = 0;
 		c = 0;
 	}
-	Line(Point source, Point target);
+	Line(Point source, Point target, char type);
 	int getIntersection_ll(set<Point>* intersections, Line l1, Line l2);
 	void operator=(const Line& line);
 };

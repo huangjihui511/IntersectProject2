@@ -38,8 +38,8 @@ int main(int argc, char** argv)
 
 	if (debug) {
 		core.addGeomrtie("L 0 0 1 1");
-		core.addGeomrtie("L 0 2 1 1");
-		core.addGeomrtie("L 3 0 1 1");
+		core.addGeomrtie("R 0 2 1 1");
+		core.addGeomrtie("S 3 0 1 1");
 		result = core.intersect();
 	}
 	cout << result;

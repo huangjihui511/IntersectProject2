@@ -37,10 +37,20 @@ int main(int argc, char** argv)
 	int debug = 1;
 
 	if (debug) {
-		core.addGeomrtie("S -1 3 2 -1");
-		core.addGeomrtie("L -2 2 3 0");
-		core.addGeomrtie("R -3 0 4 2");
+		core.addGeomrtie("L 0 0 1 1");
+		core.addGeomrtie("L 0 0 1 1");
+		core.addGeomrtie("L 0 1 1 0");
+		core.addGeomrtie("L 0 1 0 1");
+		core.addGeomrtie("L 1000000 1 1 0");
+		core.addGeomrtie("L -1000000 1 1 0");
+		//core.addGeomrtie("S -1 3 2 -1");
+		//core.addGeomrtie("L -2 2 3 0");
+		//core.addGeomrtie("R -3 0 4 2");
+		//core.addGeomrtie("R -3 0 4 2");
 		result = core.intersect();
+		for (int i = 0; i < core.errorInformations.size(); i++) {
+			cout << core.errorInformations[i] << endl;
+		}
 	}
 	cout << result;
 

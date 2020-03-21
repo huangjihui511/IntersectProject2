@@ -28,7 +28,6 @@ public:
 
 class Line {
 public:
-	//string name;
 	double a;
 	double b;
 	double c;
@@ -42,7 +41,6 @@ public:
 		b = 0;
 		c = 0;
 		type = L;
-		//name = "";
 	}
 	Line(Point source, Point target, GType type);
 
@@ -54,13 +52,11 @@ class Circle {
 public:
 	Point c;
 	double r;
-	//string name;
 	
 	Circle() {
 		r = 0;
-		//name = "";
 	}
-	Circle(Point c, double r) :c(c), r(r) {}
+	Circle(Point c, double r);
 	void operator=(const Circle& circle);
 	int getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2);
 };
@@ -112,8 +108,11 @@ public:
 int dcmp(double x);
 int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
 GType char2type(char c);
+string type2char(GType type);
 int checkError(string input);
 int checkRange(string input);
 int checkCoincide(string input);
 string errorinformation(string input);
+string point2str(Point p);
+string getName(Geometry g);
 #endif

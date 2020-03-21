@@ -55,9 +55,9 @@ Line::Line(Point src, Point dst, GType t) {
 	p1 = src;
 	p2 = dst;
 	e = (p2 - p1) / length(p2 - p1);
-	//name = n;
-
+	//name = type2char(t) + " " + point2str(p1) + " " + point2str(p2);
 }
+
 void Line::operator=(const Line& line) {
 	a = line.a;
 	b = line.b;
@@ -69,6 +69,7 @@ void Line::operator=(const Line& line) {
 }
 int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 	double D = l1.a * l2.b - l2.a * l1.b;
+	//如果重合也满足D=0被跳过
 	if (D == 0) {
 		return 0;
 	}
@@ -80,6 +81,12 @@ int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 		intersections->insert(p);
 	}
 	return 1;
+}
+
+Circle::Circle(Point c, double r) {
+	this->c = c;
+	this->r = r;
+	//name = type2char(C) + " " + point2str(c) + " " + to_string((int)r);
 }
 
 void Circle::operator=(const Circle& circle) {
@@ -94,6 +101,7 @@ int Circle::getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2) 
 	if (r1 == r2 && c1.c == c2.c) {
 		//string error = "object(" + *c1.name + ") with object(" + *c2.name + ") have infinite intersect points";
 		//errorinformation(error);
+		//重合跳过
 		return 0;
 	}
 	if (dcmp(fabs(r1 - r2) - d) > 0) return -1;
@@ -277,9 +285,9 @@ void Core::addGeomrtie(string buffer)
 		double x, y, r;
 		text >> x >> y >> r;
 		Circle *c = new Circle(Point(x, y), r);
+		//Geometry* g = new Geometry(*c);
 		//c->name = new string();
 		//c->name = buffer;
-		//Geometry* g = new Geometry(*c);
 		//memcpy(c->name, buffer.c_str(), 100);
 		geomrties.push_back(*c);
 		break;
@@ -288,17 +296,6 @@ void Core::addGeomrtie(string buffer)
 		break;
 	}
 }
-
-GType char2type(char c) {
-	switch(c)
-	{
-		case 'L': return L;
-		case 'R': return R;
-		case 'S': return S;
-		case 'C': return C;
-	}
-}
-
 
 int Core::intersect()
 {
@@ -312,8 +309,11 @@ int Core::intersect()
 				geomrties[i].getObj(l1);
 				geomrties[j].getObj(l2);
 				l1.getIntersection_ll(&intersections, l1, l2);
-				if (l1.a == l2.a && l1.b == l2.b && l1.c == l2.c) {
-					errorInformations.push_back("objects have infinite intersect points");
+				if ((l1.a != 0 && l1.b != 0 && l1.c != 0 && l2.a != 0 && l2.b != 0 && l2.c != 0 && l1.a * l2.b == l1.b * l2.a) ||
+					(l1.a == 0 && l2.a == 0 && l1.b * l2.c == l2.b * l1.c) ||
+					(l1.b == 0 && l2.b == 0 && l1.a * l2.c == l1.c * l2.a) ||
+					(l1.a != 0 && l2.a != 0 && l1.b != 0 && l2.b != 0 && l1.c == 0 && l2.c == 0 && l1.a * l2.b == l1.b * l2.a)) {
+					errorInformations.push_back("objects (" + getName(l1) + "),(" + getName(l2) + ") have infinite intersect points");
 				}
 			}
 			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == C) {
@@ -322,7 +322,7 @@ int Core::intersect()
 				geomrties[j].getObj(c2);
 				c1.getIntersection_cc(&intersections, c1, c2);
 				if (c1.c == c2.c && c1.r == c2.r) {
-					errorInformations.push_back("objects have infinite intersect points");
+					errorInformations.push_back("objects (" + getName(c1) + "),(" + getName(c2) + ") have infinite intersect points");
 				}
 			}
 			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == L) {
@@ -449,4 +449,39 @@ string errorinformation(string input) {
 		return "object(" + input + ") have 2 same points";
 	}
 	return "object is valid";
+}
+
+GType char2type(char c) {
+	switch (c)
+	{
+	case 'L': return L;
+	case 'R': return R;
+	case 'S': return S;
+	case 'C': return C;
+	}
+}
+string type2char(GType type) {
+	switch (type)
+	{
+	case L: return "L";
+	case R: return "R";
+	case S: return "S";
+	case C: return "C";
+	}
+}
+
+string point2str(Point p) {
+	int x = p.first;
+	int y = p.second;
+	return to_string(x) + " " + to_string(y);
+}
+
+string getName(Geometry g) {
+	if (g.Gflag == L) {
+		return  type2char(g.lObj.type) + " " + point2str(g.lObj.p1) + " " + point2str(g.lObj.p2);
+	}
+	else
+	{
+		return type2char(C) + " " + point2str(g.cObj.c) + " " + to_string((int)g.cObj.r);
+	}
 }

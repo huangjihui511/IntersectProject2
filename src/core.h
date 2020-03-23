@@ -3,8 +3,6 @@
 #define INTERSECT_H
 
 #include<set>
-#include<string>
-
 
 #define MAX_LENGTH 99999999;
 using namespace std;
@@ -43,7 +41,6 @@ public:
 		type = L;
 	}
 	Line(Point source, Point target, GType type);
-
 	int getIntersection_ll(set<Point>* intersections, Line l1, Line l2);
 	void operator=(const Line& line);
 };
@@ -52,18 +49,17 @@ class Circle {
 public:
 	Point c;
 	double r;
-	
+
 	Circle() {
 		r = 0;
 	}
-	Circle(Point c, double r);
+	Circle(Point c, double r) :c(c), r(r) {}
 	void operator=(const Circle& circle);
 	int getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2);
 };
 
 struct Geometry {
 	GType Gflag;
-	//string name;
 	union {
 		Line lObj;
 		Circle cObj;
@@ -97,22 +93,12 @@ class Core {
 public:
 	set<Point> intersections;
 	vector<Geometry> geomrties;
-	vector<string> errorInformations;
-	int isValid = 1;
 	void addGeomrties(ifstream *fin);
 	void addGeomrtie(string text);
 	int intersect();
-	int addError(string input);
 };
 
 int dcmp(double x);
 int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
 GType char2type(char c);
-string type2char(GType type);
-int checkError(string input);
-int checkRange(string input);
-int checkCoincide(string input);
-string errorinformation(string input);
-string point2str(Point p);
-string getName(Geometry g);
 #endif

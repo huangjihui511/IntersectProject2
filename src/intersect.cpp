@@ -74,6 +74,8 @@ void intersect::initUI()
 
 	intersectView = new QListView;
 
+	intersectView->setFixedWidth(250);
+
 	intersectSize = new QLabel;
 	intersectSize->setText("NUM:?");
 
@@ -83,12 +85,13 @@ void intersect::initUI()
 
 
 	QHBoxLayout *Lay = new QHBoxLayout;
+
 	Lay->addLayout(VLay);
 	Lay->addWidget(painter);
 	Lay->addLayout(VLay2);
 	Lay->setStretchFactor(VLay, 1);
 	Lay->setStretchFactor(painter, 100);
-	Lay->setStretchFactor(VLay2, 1);
+	//Lay->setStretchFactor(VLay2, 1);
 
 	setLayout(Lay);
 }
@@ -197,8 +200,12 @@ void intersect::updateFigure()
 
 	QStringList *qls = new QStringList();
 
+	intersectpoints->clear();
 	for (auto it = core.intersections.begin(); it != core.intersections.end(); it++) {
+
+		intersectpoints->append(QPair<double, double>(it->first, it->second));
 		qls->append("(" + QString::number(it->first) + "," + QString::number(it->second) + ")");
+
 	}
 	/* qDebug() << "result is" << result << "error size is" << core.errorInformations.size() <<
 		"obj size is" << core.geomrties.size() <<
@@ -213,6 +220,7 @@ void intersect::updateFigure()
 	//intersectSize->setNum(result);
 	painter->intersectpoints = intersectpoints;     //容器指针是不是在容器增加元素的时候不会变
 	painter->inputListModel = inputListModel;
+	
 	update();
 	QString e = "";
 	for (int i = 0; i < core.errorInformations.size(); i++) {

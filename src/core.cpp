@@ -6,7 +6,6 @@
 #include <string>
 #include "core.h"
 #include <regex>
-
 using namespace std;
 
 int dcmp(double x);
@@ -25,6 +24,38 @@ int checkRange(string input);
 int checkCoincide(string input);
 string errorinformation(string input);
 
+void Geometry::operator=(const Geometry& g)
+{
+	if (g.Gflag == L) {
+		lObj = g.lObj;
+	}
+	else if (g.Gflag == C) {
+		cObj = g.cObj;
+	}
+	Gflag = g.Gflag;
+}
+
+ Geometry::Geometry(Line l) {
+	Gflag = L;
+	lObj = l;
+}
+
+ Geometry::Geometry(Circle c) {
+	 Gflag = C;
+	 cObj = c;
+ }
+
+void Geometry::getObj(Line& obj) {
+	 if (Gflag == L) {
+		 obj = lObj;
+	 }
+}
+
+void Geometry::getObj(Circle& obj) {
+	 if (Gflag == C) {
+		 obj = cObj;
+	 }
+}
 
 Point::Point(double x, double y) {
 	first = x;

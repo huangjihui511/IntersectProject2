@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	Core core;
 	int result;
 	argc = 5;
-	if (argc == 5) {
+	if (argc == 6) {
 		//ifstream fin(argv[2]);
 		//ofstream fout(argv[4]);
 		ifstream fin("input.txt");
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 		fout.close();
 		fpoint.close();
 	}
-	int debug = 0;
+	int debug = 1;
 
 	if (debug) {
 		core.addGeomrtie("L 0 0 1 1");

@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include "core.h"
+#include <regex>
 using namespace std;
 
 int dcmp(double x);
@@ -17,6 +18,44 @@ double disLine(Point p, Line l);
 Point vbase(Circle c, Line l);
 Point prxy(Circle c, Line l);
 int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
+
+int checkError(string input);
+int checkRange(string input);
+int checkCoincide(string input);
+string errorinformation(string input);
+
+void Geometry::operator=(const Geometry& g)
+{
+	if (g.Gflag == L) {
+		lObj = g.lObj;
+	}
+	else if (g.Gflag == C) {
+		cObj = g.cObj;
+	}
+	Gflag = g.Gflag;
+}
+
+Geometry::Geometry(Line l) {
+	Gflag = L;
+	lObj = l;
+}
+
+Geometry::Geometry(Circle c) {
+	Gflag = C;
+	cObj = c;
+}
+
+void Geometry::getObj(Line& obj) {
+	if (Gflag == L) {
+		obj = lObj;
+	}
+}
+
+void Geometry::getObj(Circle& obj) {
+	if (Gflag == C) {
+		obj = cObj;
+	}
+}
 
 Point::Point(double x, double y) {
 	first = x;
@@ -47,8 +86,9 @@ Line::Line(Point src, Point dst, GType t) {
 	p1 = src;
 	p2 = dst;
 	e = (p2 - p1) / length(p2 - p1);
-
+	//name = type2char(t) + " " + point2str(p1) + " " + point2str(p2);
 }
+
 void Line::operator=(const Line& line) {
 	a = line.a;
 	b = line.b;
@@ -60,7 +100,10 @@ void Line::operator=(const Line& line) {
 }
 int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 	double D = l1.a * l2.b - l2.a * l1.b;
-	if (D == 0) return 0;
+	//如果重合也满足D=0被跳过
+	if (D == 0) {
+		return 0;
+	}
 	Point p = { (l1.b * l2.c - l2.b * l1.c) / D, (l2.a * l1.c - l1.a * l2.c) / D };
 	//p.first = (float)p.first;
 	//p.second = (float)p.second;
@@ -69,6 +112,12 @@ int Line::getIntersection_ll(set<Point>* intersections, Line l1, Line l2) {
 		intersections->insert(p);
 	}
 	return 1;
+}
+
+Circle::Circle(Point c, double r) {
+	this->c = c;
+	this->r = r;
+	//name = type2char(C) + " " + point2str(c) + " " + to_string((int)r);
 }
 
 void Circle::operator=(const Circle& circle) {
@@ -80,7 +129,12 @@ int Circle::getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2) 
 	double r1 = c1.r, r2 = c2.r;
 	double x1 = c1.c.first, x2 = c2.c.first, y1 = c1.c.second, y2 = c2.c.second;
 	double d = length(c1.c - c2.c);		//dist of circle center
-
+	if (r1 == r2 && c1.c == c2.c) {
+		//string error = "object(" + *c1.name + ") with object(" + *c2.name + ") have infinite intersect points";
+		//errorinformation(error);
+		//重合跳过
+		return 0;
+	}
 	if (dcmp(fabs(r1 - r2) - d) > 0) return -1;
 	if (dcmp(r1 + r2 - d) < 0) return 0;
 
@@ -221,7 +275,7 @@ int getIntersection_cl(set<Point>* intersections, Circle c, Line l) {
 
 
 
-void Core::addGeomrties(ifstream *fin)
+void Core::addGeomrties(ifstream* fin)
 {
 	char buffer[256];
 	int n;
@@ -236,6 +290,9 @@ void Core::addGeomrties(ifstream *fin)
 void Core::addGeomrtie(string buffer)
 {
 	char type;
+	if (addError(buffer) == 1) {
+		return;
+	}
 	stringstream text(buffer);
 	text >> type;
 	switch (type)
@@ -245,13 +302,25 @@ void Core::addGeomrtie(string buffer)
 	case 'S': {
 		double x1, y1, x2, y2;
 		text >> x1 >> y1 >> x2 >> y2;
-		geomrties.push_back(Line(Point(x1, y1), Point(x2, y2),char2type(type)));
+		Line* l = new Line(Point(x1, y1), Point(x2, y2), char2type(type));
+		//Geometry* g = new Geometry(*l);
+
+		//l->name = new string();
+		//l->name = buffer;
+		//memcpy(l->name, buffer.c_str(), 100);
+
+		geomrties.push_back(*l);
 		break;
 	}
 	case 'C': {
 		double x, y, r;
 		text >> x >> y >> r;
-		geomrties.push_back(Circle(Point(x, y), r));
+		Circle* c = new Circle(Point(x, y), r);
+		//Geometry* g = new Geometry(*c);
+		//c->name = new string();
+		//c->name = buffer;
+		//memcpy(c->name, buffer.c_str(), 100);
+		geomrties.push_back(*c);
 		break;
 	}
 	default:
@@ -259,18 +328,11 @@ void Core::addGeomrtie(string buffer)
 	}
 }
 
-GType char2type(char c) {
-	switch(c)
-	{
-		case 'L': return L;
-		case 'R': return R;
-		case 'S': return S;
-		case 'C': return C;
-	}
-}
-
 int Core::intersect()
 {
+	if (isValid == 0) {
+		return 0;
+	}
 	for (int i = 0; i < (int)(geomrties.size()); i++) {
 		for (int j = 0; j < i; j++) {
 			if (geomrties[i].Gflag == L && geomrties[j].Gflag == L) {
@@ -278,12 +340,21 @@ int Core::intersect()
 				geomrties[i].getObj(l1);
 				geomrties[j].getObj(l2);
 				l1.getIntersection_ll(&intersections, l1, l2);
+				if ((l1.a != 0 && l1.b != 0 && l1.c != 0 && l2.a != 0 && l2.b != 0 && l2.c != 0 && l1.a * l2.b == l1.b * l2.a) ||
+					(l1.a == 0 && l2.a == 0 && l1.b * l2.c == l2.b * l1.c) ||
+					(l1.b == 0 && l2.b == 0 && l1.a * l2.c == l1.c * l2.a) ||
+					(l1.a != 0 && l2.a != 0 && l1.b != 0 && l2.b != 0 && l1.c == 0 && l2.c == 0 && l1.a * l2.b == l1.b * l2.a)) {
+					errorInformations.push_back("objects (" + getName(l1) + "),(" + getName(l2) + ") have infinite intersect points");
+				}
 			}
 			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == C) {
 				Circle c1, c2;
 				geomrties[i].getObj(c1);
 				geomrties[j].getObj(c2);
 				c1.getIntersection_cc(&intersections, c1, c2);
+				if (c1.c == c2.c && c1.r == c2.r) {
+					errorInformations.push_back("objects (" + getName(c1) + "),(" + getName(c2) + ") have infinite intersect points");
+				}
 			}
 			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == L) {
 				Line line;
@@ -291,6 +362,7 @@ int Core::intersect()
 				geomrties[i].getObj(circle);
 				geomrties[j].getObj(line);
 				getIntersection_cl(&intersections, circle, line);
+
 			}
 			else if (geomrties[i].Gflag == L && geomrties[j].Gflag == C) {
 				Line line;
@@ -305,4 +377,142 @@ int Core::intersect()
 		}
 	}
 	return intersections.size();
+}
+
+int Core::addError(string input)
+{
+	string error = errorinformation(input);
+	if (error != "object is valid") {
+		errorInformations.push_back(error);
+		isValid = 0;
+		return 1;
+	}
+	return 0;
+}
+
+int checkError(string input) {
+	regex e1("L\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s*");
+	regex e2("C\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s*");
+	regex e3("R\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s*");
+	regex e4("S\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s+[+-]?\\d+\\s*");
+	if (regex_match(input, e1)) {
+		return 1;
+	}
+	if (regex_match(input, e2)) {
+		return 2;
+	}
+	if (regex_match(input, e3)) {
+		return 3;
+	}
+	if (regex_match(input, e4)) {
+		return 4;
+	}
+	return 0;
+}
+
+int checkRange(string input) {
+
+	smatch m;
+
+	char t = input.at(0);
+	switch (t) {
+	case 'L':
+	case 'R':
+	case 'S': {
+		regex e("[A-Z]\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s*");
+		bool found = regex_search(input, m, e);
+		for (int i = 1; i < m.size(); ++i) {
+			//cout << "m.str(" << i << "): " << m.str(i) << endl;
+			int index = stoi(m.str(i));
+			if (index > 100000 || index < -100000) {
+				return 1;
+			}
+		}
+		break;
+	}
+	case 'C': {
+		regex e("[A-Z]\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s*");
+		bool found = regex_search(input, m, e);
+		for (int i = 1; i < m.size(); ++i) {
+			//cout << "m.str(" << i << "): " << m.str(i) << endl;
+			int index = stoi(m.str(i));
+			if (index > 100000 || index < -100000) {
+				return 1;
+			}
+		}
+		int r = stoi(m.str(3));
+		if (r <= 0) {
+			return 1;
+		}
+		break;
+	}
+	}
+	return 0;
+}
+
+int checkCoincide(string input) {
+	smatch m;
+
+	char t = input.at(0);
+	switch (t) {
+	case 'L':
+	case 'R':
+	case 'S': {
+		regex e("[A-Z]\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s+([+-]?\\d+)\\s*");
+		bool found = regex_search(input, m, e);
+		if ((stoi(m.str(1)) == stoi(m.str(3))) && (stoi(m.str(2)) == stoi(m.str(4)))) {
+			return 1;
+		}
+		break;
+	}
+	}
+	return 0;
+}
+
+string errorinformation(string input) {
+	if (checkError(input) == 0) {
+		return "object(" + input + ") is not valid";
+	}
+	if (checkRange(input)) {
+		return "object(" + input + ") is out of range";
+	}
+	if (checkCoincide(input)) {
+		return "object(" + input + ") have 2 same points";
+	}
+	return "object is valid";
+}
+
+GType char2type(char c) {
+	switch (c)
+	{
+	case 'L': return L;
+	case 'R': return R;
+	case 'S': return S;
+	case 'C': return C;
+	}
+}
+string type2char(GType type) {
+	switch (type)
+	{
+	case L: return "L";
+	case R: return "R";
+	case S: return "S";
+	case C: return "C";
+	}
+}
+
+string point2str(Point p) {
+	int x = p.first;
+	int y = p.second;
+	return to_string(x) + " " + to_string(y);
+}
+
+string getName(Geometry g) {
+	if (g.Gflag == L) {
+		return  type2char(g.lObj.type) + " " + point2str(g.lObj.p1) + " " + point2str(g.lObj.p2);
+	}
+	else
+	{
+		return type2char(C) + " " + point2str(g.cObj.c) + " " + to_string((int)g.cObj.r);
+	}
 }

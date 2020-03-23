@@ -1,16 +1,25 @@
+//#ifdef DLL3_EXPORTS
+//#define DLL3_API __declspec(dllexport)
+//#else
+//#define DLL3_API __declspec(dllimport)
+//#endif
+#define DLL3_API __declspec(dllexport)
+
 #pragma once
 #ifndef INTERSECT_H
 #define INTERSECT_H
 
 #include<set>
+#include<string>
+
 
 #define MAX_LENGTH 99999999;
 using namespace std;
 
-enum GType { L, C, S, R};
+enum DLL3_API GType { L, C, S, R };
 const double eps = 1e-7;
 
-class Point : public pair<double, double> {
+class DLL3_API Point : public pair<double, double> {
 public:
 	Point() {}
 	Point(double x, double y);
@@ -24,7 +33,7 @@ public:
 	//}
 };
 
-class Line {
+class DLL3_API Line {
 public:
 	double a;
 	double b;
@@ -41,11 +50,12 @@ public:
 		type = L;
 	}
 	Line(Point source, Point target, GType type);
+
 	int getIntersection_ll(set<Point>* intersections, Line l1, Line l2);
 	void operator=(const Line& line);
 };
 
-class Circle {
+class DLL3_API Circle {
 public:
 	Point c;
 	double r;
@@ -53,52 +63,50 @@ public:
 	Circle() {
 		r = 0;
 	}
-	Circle(Point c, double r) :c(c), r(r) {}
+	Circle(Point c, double r);
 	void operator=(const Circle& circle);
 	int getIntersection_cc(set<Point>* intersections, Circle c1, Circle c2);
 };
 
-struct Geometry {
+struct DLL3_API Geometry {
 	GType Gflag;
+	//string name;
 	union {
 		Line lObj;
 		Circle cObj;
 	};
 
-	Geometry(Line l) {
-		Gflag = L;
-		lObj = l;
-	}
+	Geometry(Line l);
 
-	Geometry(Circle c) {
-		Gflag = C;
-		cObj = c;
-	}
+	Geometry(Circle c);
 
-	void getObj(Line& obj) {
-		if (Gflag == L) {
-			obj = lObj;
-		}
-	}
+	void getObj(Line& obj);
 
-	void getObj(Circle& obj) {
-		if (Gflag == C) {
-			obj = cObj;
-		}
-	}
+	void getObj(Circle& obj);
+
+	void operator=(const Geometry& g);
 };
 
-class Core {
-
+class DLL3_API Core {
 public:
 	set<Point> intersections;
 	vector<Geometry> geomrties;
-	void addGeomrties(ifstream *fin);
+	vector<string> errorInformations;
+	int isValid = 1;
+	void addGeomrties(ifstream* fin);
 	void addGeomrtie(string text);
 	int intersect();
+	int addError(string input);
 };
 
-int dcmp(double x);
-int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
-GType char2type(char c);
+DLL3_API int dcmp(double x);
+DLL3_API int getIntersection_cl(set<Point>* intersections, Circle c, Line l);
+DLL3_API GType char2type(char c);
+DLL3_API string type2char(GType type);
+DLL3_API int checkError(string input);
+DLL3_API int checkRange(string input);
+DLL3_API int checkCoincide(string input);
+DLL3_API string errorinformation(string input);
+DLL3_API string point2str(Point p);
+DLL3_API string getName(Geometry g);
 #endif

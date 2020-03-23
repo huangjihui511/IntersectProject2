@@ -16,7 +16,7 @@
 #define MAX_LENGTH 99999999;
 using namespace std;
 
-enum DLL3_API GType { L, C, S, R };
+enum DLL3_API GType { L, C, S, R};
 const double eps = 1e-7;
 
 class DLL3_API Point : public pair<double, double> {
@@ -59,7 +59,7 @@ class DLL3_API Circle {
 public:
 	Point c;
 	double r;
-
+	
 	Circle() {
 		r = 0;
 	}
@@ -93,7 +93,7 @@ public:
 	vector<Geometry> geomrties;
 	vector<string> errorInformations;
 	int isValid = 1;
-	void addGeomrties(ifstream* fin);
+	void addGeomrties(ifstream *fin);
 	void addGeomrtie(string text);
 	int intersect();
 	int addError(string input);

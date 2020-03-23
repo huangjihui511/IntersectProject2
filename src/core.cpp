@@ -35,26 +35,26 @@ void Geometry::operator=(const Geometry& g)
 	Gflag = g.Gflag;
 }
 
-Geometry::Geometry(Line l) {
+ Geometry::Geometry(Line l) {
 	Gflag = L;
 	lObj = l;
 }
 
-Geometry::Geometry(Circle c) {
-	Gflag = C;
-	cObj = c;
-}
+ Geometry::Geometry(Circle c) {
+	 Gflag = C;
+	 cObj = c;
+ }
 
 void Geometry::getObj(Line& obj) {
-	if (Gflag == L) {
-		obj = lObj;
-	}
+	 if (Gflag == L) {
+		 obj = lObj;
+	 }
 }
 
 void Geometry::getObj(Circle& obj) {
-	if (Gflag == C) {
-		obj = cObj;
-	}
+	 if (Gflag == C) {
+		 obj = cObj;
+	 }
 }
 
 Point::Point(double x, double y) {
@@ -275,7 +275,7 @@ int getIntersection_cl(set<Point>* intersections, Circle c, Line l) {
 
 
 
-void Core::addGeomrties(ifstream* fin)
+void Core::addGeomrties(ifstream *fin)
 {
 	char buffer[256];
 	int n;
@@ -304,18 +304,18 @@ void Core::addGeomrtie(string buffer)
 		text >> x1 >> y1 >> x2 >> y2;
 		Line* l = new Line(Point(x1, y1), Point(x2, y2), char2type(type));
 		//Geometry* g = new Geometry(*l);
-
+		
 		//l->name = new string();
 		//l->name = buffer;
 		//memcpy(l->name, buffer.c_str(), 100);
-
+		
 		geomrties.push_back(*l);
 		break;
 	}
 	case 'C': {
 		double x, y, r;
 		text >> x >> y >> r;
-		Circle* c = new Circle(Point(x, y), r);
+		Circle *c = new Circle(Point(x, y), r);
 		//Geometry* g = new Geometry(*c);
 		//c->name = new string();
 		//c->name = buffer;

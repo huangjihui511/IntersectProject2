@@ -107,6 +107,7 @@ DLL3_API string type2char(GType type);
 DLL3_API int checkError(string input);
 DLL3_API int checkRange(string input);
 DLL3_API int checkCoincide(string input);
+DLL3_API int checkChongHe(Geometry g1, Geometry g2);
 DLL3_API string errorinformation(string input);
 DLL3_API string point2str(Point p);
 DLL3_API string getName(Geometry g);

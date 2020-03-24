@@ -6,6 +6,10 @@
 #include <string>
 #include "core.h"
 #include <regex>
+
+#define MAX(a,b) (a) > (b)? (a) : (b)
+#define MIN(a,b) (a) < (b)? (a) : (b)
+
 using namespace std;
 
 int dcmp(double x);
@@ -344,7 +348,9 @@ int Core::intersect()
 					(l1.a == 0 && l2.a == 0 && l1.b * l2.c == l2.b * l1.c) ||
 					(l1.b == 0 && l2.b == 0 && l1.a * l2.c == l1.c * l2.a) ||
 					(l1.a != 0 && l2.a != 0 && l1.b != 0 && l2.b != 0 && l1.c == 0 && l2.c == 0 && l1.a * l2.b == l1.b * l2.a)) {
-					errorInformations.push_back("objects (" + getName(l1) + "),(" + getName(l2) + ") have infinite intersect points");
+					if (checkChongHe(geomrties[i], geomrties[j])) {
+						errorInformations.push_back("objects (" + getName(l1) + "),(" + getName(l2) + ") have infinite intersect points");
+					}
 				}
 			}
 			else if (geomrties[i].Gflag == C && geomrties[j].Gflag == C) {
@@ -436,7 +442,7 @@ int checkRange(string input) {
 		for (int i = 1; i < m.size(); ++i) {
 			//cout << "m.str(" << i << "): " << m.str(i) << endl;
 			int index = stoi(m.str(i));
-			if (index > 100000 || index < -100000) {
+			if (index >= 100000 || index <= -100000) {
 				return 1;
 			}
 		}
@@ -515,4 +521,80 @@ string getName(Geometry g) {
 	{
 		return type2char(C) + " " + point2str(g.cObj.c) + " " + to_string((int)g.cObj.r);
 	}
+}
+
+int checkChongHe(Geometry g1, Geometry g2) {
+	if (g1.Gflag == L && g2.Gflag == L) {
+		Line l1, l2;
+		g1.getObj(l1);
+		g2.getObj(l2);
+		//l1.getIntersection_ll(&intersections, l1, l2);
+		if ((l1.a != 0 && l1.b != 0 && l1.c != 0 && l2.a != 0 && l2.b != 0 && l2.c != 0 && l1.a * l2.b == l1.b * l2.a) ||
+			(l1.a == 0 && l2.a == 0 && l1.b * l2.c == l2.b * l1.c) ||
+			(l1.b == 0 && l2.b == 0 && l1.a * l2.c == l1.c * l2.a) ||
+			(l1.a != 0 && l2.a != 0 && l1.b != 0 && l2.b != 0 && l1.c == 0 && l2.c == 0 && l1.a * l2.b == l1.b * l2.a)) {
+			if (l1.type == L || l2.type == L) {
+				
+			}
+			else if (l1.type == S || l2.type == S) {
+				int count = 0;
+				if (onLine(l1, l2.p1)) {
+					count++;
+				}
+				if (onLine(l1, l2.p2)) {
+					count++;
+				}
+				if (onLine(l2, l1.p1)) {
+					count++;
+				}
+				if (onLine(l2, l1.p2)) {
+					count++;
+				}
+				if (count == 0) {
+					return 0;
+				}
+				else if (count == 2) {
+					if ((MAX(l1.p1.first, l1.p2.first) == MIN(l2.p1.first, l2.p2.first) || MIN(l1.p1.first, l1.p2.first) == MAX(l2.p1.first, l2.p2.first)) &&
+						(MAX(l1.p1.second, l1.p2.second) == MIN(l2.p1.second, l2.p2.second) || MIN(l1.p1.second, l1.p2.second) == MAX(l2.p1.second, l2.p2.second))) {
+						return 0;
+					}
+				}
+			}
+			else if (l1.type == R || l2.type == R) {
+				if ((l1.p1.first - l1.p2.first) * (l2.p1.first - l2.p2.first) > 0 || (l1.p1.second - l1.p2.second) * (l2.p1.second - l2.p2.second) > 0) {
+
+				}
+				else {
+					if (onLine(l1, l2.p1)) {
+						if (l1.p1 == l2.p1) {
+							return 0;
+						}
+					}
+
+				}
+				
+			}
+			else if (l1.type == R || l2.type == S) {
+				int count = 0;
+				if (onLine(l1, l2.p1)) {
+					count++;
+				}
+				if (onLine(l1, l2.p2)) {
+					count++;
+				}
+				if (count == 0) {
+					return 0;
+				}
+				if (count == 1) {
+					if (l1.p1 == l2.p1 || l1.p1 == l2.p2) {
+						return 0;
+					}
+				}
+			}
+			else if (l1.type == S || l2.type == R) {
+				return checkChongHe(g2, g1);
+			}
+		}
+	}
+	return 1;
 }

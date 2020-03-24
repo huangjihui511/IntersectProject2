@@ -165,7 +165,7 @@ void intersect::deleteInput()
 {
 	QModelIndex index = inputListView->currentIndex();
 	inputListModel->removeRow(index.row());
-	updateFigure();
+	//updateFigure();
 	
 }
 
